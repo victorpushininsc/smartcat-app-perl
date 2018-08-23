@@ -55,6 +55,7 @@
             "List::Util" : "0",
             "Log::Any" : "0",
             "Log::Any::Adapter" : "0",
+            "Log::Any::Adapter::Log4perl" : "0",
             "Log::Log4perl" : "0",
             "Smartcat::Client::AccountApi" : "0",
             "Smartcat::Client::DocumentApi" : "0",
@@ -71,9 +72,11 @@
       },
       "test" : {
          "requires" : {
+            "File::Remove" : "0",
             "File::Spec" : "0",
             "IO::Handle" : "0",
             "IPC::Open3" : "0",
+            "Test::MockModule" : "0",
             "Test::More" : "0",
             "perl" : "5.006"
          }

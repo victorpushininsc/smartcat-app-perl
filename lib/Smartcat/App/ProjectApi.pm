@@ -41,9 +41,22 @@ sub get_project {
             $self->{rundata}->{project_id},
             format_error_message($@)
         )
-    ) unless ($project);
+    ) unless $project;
 
     return $project;
+}
+
+sub get_all_projects {
+    my $self = shift @_;
+
+    $log->info("Getting all projects...");
+    my $projects = eval { $self->{api}->project_get_all; };
+    die $log->error(
+        sprintf( "Failed to get all projects.\nError:\n%s",
+            format_error_message($@) )
+    ) unless $projects;
+
+    return $projects;
 }
 
 sub upload_file {

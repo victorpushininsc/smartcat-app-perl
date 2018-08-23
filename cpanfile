@@ -15,6 +15,7 @@ requires "List::Util" => "0";
 requires "Log::Any" => "0";
 requires "Log::Any::Adapter" => "0";
 requires "Log::Log4perl" => "0";
+requires "Log::Any::Adapter::Log4perl" => "0";
 requires "Smartcat::Client::AccountApi" => "0";
 requires "Smartcat::Client::DocumentApi" => "0";
 requires "Smartcat::Client::DocumentExportApi" => "0";
@@ -32,6 +33,8 @@ on 'test' => sub {
   requires "IO::Handle" => "0";
   requires "IPC::Open3" => "0";
   requires "Test::More" => "0";
+  requires "Test::MockModule" => "0";
+  requires "File::Remove" => "0";
   requires "perl" => "5.006";
 };
 

@@ -49,28 +49,54 @@ sub init {
         username => $self->{config}->username,
         password => $self->{config}->password
     );
-    if ( defined $self->{config}->{log} ) {
-        Log::Log4perl->init( \ <<"EOT");
-log4perl.logger = INFO, file, screen
 
+    my $log_level = "INFO";
+    if ( defined $self->{rundata}->{debug} ) {
+        $log_level = "DEBUG";
+        print "*** DEBUG mode is turned on ***\n";
+    }
+
+    my $appender = "";
+    my $filter   = <<"EOT";
 log4perl.filter.MatchWarnInfoDebug = Log::Log4perl::Filter::LevelRange
 log4perl.filter.MatchWarnInfoDebug.LevelMin = DEBUG
 log4perl.filter.MatchWarnInfoDebug.LevelMax = WARN
-
-log4perl.appender.screen = Log::Log4perl::Appender::Screen
-log4perl.appender.screen.stderr = 0
-log4perl.appender.screen.layout = PatternLayout
-log4perl.appender.screen.layout.ConversionPattern = %m%n
 log4perl.appender.screen.Filter = MatchWarnInfoDebug
-
+EOT
+    my $logger = "";
+    if ( defined $self->{config}->log && $self->{config}->log ne "" ) {
+        print "*** Printing to '$self->{config}->{log}' log file ***\n";
+        $logger   = ", file";
+        $appender = <<"EOT";
 log4perl.appender.file = Log::Log4perl::Appender::File
 log4perl.appender.file.filename = $self->{config}->{log}
 log4perl.appender.file.mode = append
 log4perl.appender.file.layout = PatternLayout
 log4perl.appender.file.layout.ConversionPattern = [%d] %p> %m%n
 EOT
-        Log::Any::Adapter->set('Log::Log4perl');
+        $filter = <<"EOT";
+log4perl.filter.MatchWarnInfo = Log::Log4perl::Filter::LevelRange
+log4perl.filter.MatchWarnInfo.LevelMin = INFO
+log4perl.filter.MatchWarnInfo.LevelMax = WARN
+log4perl.appender.screen.Filter = MatchWarnInfo
+EOT
+
     }
+
+    Log::Log4perl->init( \ <<"EOT");
+log4perl.logger = $log_level, screen $logger
+
+log4perl.appender.screen = Log::Log4perl::Appender::Screen
+log4perl.appender.screen.stderr = 0
+log4perl.appender.screen.layout = PatternLayout
+log4perl.appender.screen.layout.ConversionPattern = %m%n
+$filter
+
+$appender
+
+EOT
+
+    Log::Any::Adapter->set('Log::Log4perl');
 }
 
 sub new {

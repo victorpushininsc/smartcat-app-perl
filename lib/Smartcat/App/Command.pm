@@ -11,7 +11,8 @@ sub opt_spec {
         #[ 'config:s' => 'Config file path' ],
         [ 'token-id:s' => 'Smartcat account id' ],
         [ 'token:s'    => 'API token' ],
-        [ 'log:s'      => 'Log file path' ]
+        [ 'log:s'      => 'Log file path' ],
+        [ 'debug'      => 'Debug mode' ]
     );
 }
 
@@ -68,7 +69,8 @@ sub validate_project_workdir {
 sub validate_args {
     my ( $self, $opt, $args ) = @_;
 
-    my $app = $self->app;
+    my $app     = $self->app;
+    my $rundata = $self->app->{rundata};
 
     if ( defined $opt->{token_id} && defined $opt->{token} ) {
         $app->{config}->{username} = $opt->{token_id};
@@ -86,6 +88,8 @@ sub validate_args {
       )
       unless ( defined $app->{config}->username
         && defined $app->{config}->password );
+
+    $rundata->{debug} = 1 if defined $opt->{debug};
 
     $app->init;
 }

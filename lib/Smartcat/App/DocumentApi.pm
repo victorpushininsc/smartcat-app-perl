@@ -77,4 +77,23 @@ sub get_document {
     return $document;
 }
 
+sub delete_documents {
+    my ( $self, $document_ids ) = @_;
+    return unless $document_ids;
+
+    $log->info( 'Deleting documents: ' . join( ', ', @$document_ids ) . '...' );
+    my %args = ( document_ids => $document_ids, );
+
+    eval { $self->{api}->document_delete(%args); };
+    die $log->error(
+        sprintf(
+            "Failed to delete documents: %s.\nError:\n%s",
+            join( ', ', @$document_ids ),
+            format_error_message($@)
+        )
+    ) if $@;
+
+    return;
+}
+
 1;

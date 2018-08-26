@@ -77,7 +77,7 @@ sub execute {
     find(
         sub {
             if (   -f $File::Find::name
-                && $_ !~ m/^\./
+                && !m/^\.$/
                 && m/$rundata->{filetype}$/ )
             {
                 s/$rundata->{filetype}$//;

@@ -4,6 +4,7 @@ use warnings;
 package Smartcat::App::Command;
 use App::Cmd::Setup -command;
 
+use Cwd qw(abs_path);
 use File::Basename;
 
 sub opt_spec {
@@ -63,7 +64,7 @@ sub validate_project_workdir {
     $self->app->usage_error(
 "'project_workdir', which is set to '$opt->{project_workdir}', does not point to a valid directory"
     ) unless -d $opt->{project_workdir};
-    $rundata->{project_workdir} = $opt->{project_workdir};
+    $rundata->{project_workdir} = abs_path( $opt->{project_workdir} );
 }
 
 sub validate_args {

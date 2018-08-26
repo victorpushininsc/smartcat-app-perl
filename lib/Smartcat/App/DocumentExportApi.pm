@@ -11,7 +11,7 @@ use Smartcat::Client::DocumentExportApi;
 
 use Smartcat::App::Constants qw(
   EXPORT_ZIP_FILES_COUNT
-  TOTAL_WAIT_TIMEOUT
+  TOTAL_ITERATION_COUNT
   ITERATION_WAIT_TIMEOUT
 );
 use Smartcat::App::Utils;
@@ -68,7 +68,7 @@ sub export_files {
         my $counter = 0;
 
         #die $task->id;
-        while ( $counter < TOTAL_WAIT_TIMEOUT ) {
+        while ( $counter < TOTAL_ITERATION_COUNT ) {
             $log->info("Downloading exported files...");
             $response = eval {
                 $api->document_export_download_export_result(
@@ -89,7 +89,7 @@ sub export_files {
             $counter++;
         }
         die $log->error("Cannot download exported files: $task->document_ids")
-          if $counter == TOTAL_WAIT_TIMEOUT;
+          if $counter == TOTAL_ITERATION_COUNT;
         if ($single_file_export) {
             my $doc  = $docs{ @{ $task->document_ids }[0] };
             my $name = $doc->name;

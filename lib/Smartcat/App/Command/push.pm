@@ -11,7 +11,7 @@ use File::Find qw(find);
 use List::Util qw(first);
 
 use Smartcat::App::Constants qw(
-  TOTAL_WAIT_TIMEOUT
+  TOTAL_ITERATION_COUNT
   ITERATION_WAIT_TIMEOUT
   DOCUMENT_DISASSEMBLING_SUCCESS_STATUS
 );
@@ -183,7 +183,7 @@ sub _upload_to_tree {
 
     my $document_api = $self->app->document_api;
     for (@$ts_files) {
-        sleep ITERATION_WAIT_TIMEOUT * 2;
+        sleep ITERATION_WAIT_TIMEOUT * 5;
         my $lang    = get_language_from_ts_filepath($_);
         my $doc     = first { $_->target_language eq $lang } @$documents;
         my $counter = 0;
@@ -199,10 +199,10 @@ sub _upload_to_tree {
                 )
             );
             $counter++;
-            sleep ITERATION_WAIT_TIMEOUT * 2;
+            sleep ITERATION_WAIT_TIMEOUT * 5 * $counter;
         }
         die $log->error( sprintf( "Cannot update document %s.", $doc->id ) )
-          if $counter == TOTAL_WAIT_TIMEOUT;
+          if $counter == TOTAL_ITERATION_COUNT;
         $document_api->update_document( $_, $doc->id );
     }
 }

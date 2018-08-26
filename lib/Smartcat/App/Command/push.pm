@@ -106,10 +106,13 @@ sub execute {
 
     $log->info(
         sprintf(
-"State:\n  Upload count: %d\n  Update count: %d\n  Obsolete count: %d\n",
+"State:\n  Upload [%d]\n    %s\n  Update [%d]\n    %s\n  Obsolete [%d]\n    %s\n",
             scalar @upload,
+            join( ', ', map { "'$_'" } @upload ),
             scalar @update,
-            scalar @obsolete
+            join( ', ', map { "'$_'" } @update ),
+            scalar @obsolete,
+            join( ', ', map { "'$_'" } @obsolete )
         )
     );
 

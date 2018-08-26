@@ -133,7 +133,10 @@ sub execute {
 sub update {
     my ( $self, $project, $documents, $ts_files ) = @_;
 
-    my $api = $self->app->document_api;
+    my $app     = $self->app;
+    my $api     = $app->document_api;
+    my $rundata = $app->{rundata};
+
     my @target_languages =
       map { &get_language_from_ts_filepath($_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
@@ -169,10 +172,15 @@ sub update {
         "No documents for files:" . join( ', ', @files_without_documents ) )
       if @files_without_documents;
 
-    $api->update_document( @{ $lang_pairs{$_} } ) for ( keys %lang_pairs );
+    unless ( $rundata->{language_file_tree} ) {
+        $api->update_document( @{ $lang_pairs{$_} } ) for ( keys %lang_pairs );
+    }
+    else {
+        $self->_update_tree_document( $ts_files, $documents );
+    }
 }
 
-sub _upload_to_tree {
+sub _upload_tree_document {
     my ( $self, $ts_files, $target_languages ) = @_;
 
     #my $path = $ts_files->[0];
@@ -183,6 +191,12 @@ sub _upload_to_tree {
 
     $log->info( "Created documents ids:\n  "
           . join( ', ', map { $_->id } @$documents ) );
+
+    self->_update_tree_document( $ts_files, $documents );
+}
+
+sub _update_tree_document {
+    my ( $self, $ts_files, $documents ) = @_;
 
     my $document_api = $self->app->document_api;
     for (@$ts_files) {
@@ -226,7 +240,7 @@ sub upload {
                 join( ', ', @project_target_languages )
             )
         ) unless @target_languages == @project_target_languages;
-        $self->_upload_to_tree( $ts_files, \@target_languages );
+        $self->_upload_tree_document( $ts_files, \@target_languages );
     }
     else {
         croak("Conflict: one target language to one file expected.")

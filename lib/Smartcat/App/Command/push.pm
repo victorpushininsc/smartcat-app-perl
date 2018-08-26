@@ -95,7 +95,6 @@ sub execute {
     my %stats;
     $stats{$_}++ for ( keys %documents, keys %ts_files );
 
-    #print Dumper \%stats;
     my ( @upload, @obsolete, @update );
     push @{
         defined $documents{$_}
@@ -113,12 +112,12 @@ sub execute {
             scalar @obsolete
         )
     );
-    $self->upload( $project, $ts_files{$_} ) for @upload;
 
-    #p @update;
+    $self->upload( $project, $ts_files{$_} ) for @upload;
     $self->update( $project, $documents{$_}, $ts_files{$_} ) for @update;
 
     #todo: obsolete
+
     $log->info(
         sprintf(
 "Finished 'push' command for project '%s' and translation files from '%s'.",
@@ -188,9 +187,7 @@ sub _upload_to_tree {
         my $lang    = get_language_from_ts_filepath($_);
         my $doc     = first { $_->target_language eq $lang } @$documents;
         my $counter = 0;
-        while ( $counter < TOTAL_WAIT_TIMEOUT ) {
-
-#my $d = $counter == 0 ? $project_documents{$doc->id} : $document_api->get_document($doc->id);
+        while ( $counter < TOTAL_ITERATION_COUNT ) {
             my $d = $document_api->get_document( $doc->id );
             last
               if $d->document_disassembling_status eq

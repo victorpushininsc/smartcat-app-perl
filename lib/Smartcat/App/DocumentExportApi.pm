@@ -29,7 +29,7 @@ sub new {
 
     my $self = bless(
         {
-            api     => Smartcat::Client::DocumentExportApi->new( $api ),
+            api     => Smartcat::Client::DocumentExportApi->new($api),
             rundata => $rundata
         },
         $class

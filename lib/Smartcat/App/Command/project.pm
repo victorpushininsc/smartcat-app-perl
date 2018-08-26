@@ -50,7 +50,7 @@ sub print_project {
     print "Project:\n\t" . $project->name . "\n";
     print "Id:\n\t" . $project->id . "\n";
     print "Number of documents:\n";
-    print "\t".@{ $project->documents }."\n";
+    print "\t" . @{ $project->documents } . "\n";
     print "Target languages:\n";
     print "\t" . join( ' ', @{ $project->target_languages } ) . "\n";
     print "Status:\n\t" . $project->status . "\n";
@@ -64,7 +64,7 @@ sub execute {
     my $api = $self->app->project_api;
     if ( defined $opt->{list} ) {
         my $projects = $api->get_all_projects;
-        print "Total number of projects:\n\t".@$projects."\n";
+        print "Total number of projects:\n\t" . @$projects . "\n";
         print "-" x 80;
         print "\n";
         $self->print_project($_) for @$projects;

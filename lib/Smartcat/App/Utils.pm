@@ -28,8 +28,11 @@ sub get_ts_file_key {
 }
 
 sub get_document_key {
-    $_ = shift;
-    return $_->name . ' (' . $_->target_language . ')';
+    my ( $name, $target_language ) = @_;
+
+    my $key = $name;
+    $key =~ s/_($target_language)$//i;
+    return $key . ' (' . $target_language . ')';
 }
 
 sub prepare_document_name {

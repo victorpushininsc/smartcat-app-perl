@@ -66,7 +66,9 @@ sub execute {
     my %documents;
     for ( @{ $project->documents } ) {
         my $key =
-          $rundata->{file_per_language} ? &get_document_key($_) : $_->name;
+            $rundata->{language_file_tree}
+          ? $_->name
+          : &get_document_key( $_->name, $_->target_language );
         $documents{$key} = [] unless defined $documents{$key};
         push @{ $documents{$key} }, $_;
     }
@@ -81,7 +83,7 @@ sub execute {
                 s/$rundata->{filetype}$//;
                 my $name = catfile( dirname($File::Find::name), $_ );
                 my $key =
-                  $rundata->{file_per_language} ? &get_ts_file_key($name) : $_;
+                  $rundata->{language_file_tree} ? $_ : &get_ts_file_key($name);
                 $ts_files{$key} = [] unless defined $ts_files{$key};
                 push @{ $ts_files{$key} }, $File::Find::name;
             }
@@ -216,7 +218,7 @@ sub upload {
       map { &get_language_from_ts_filepath($_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
 
-    unless ( $rundata->{file_per_language} ) {
+    if ( $rundata->{language_file_tree} ) {
         $log->warn(
             sprintf(
 "Project target languages do not match translation files.\n  files: %s\n  project: %s",

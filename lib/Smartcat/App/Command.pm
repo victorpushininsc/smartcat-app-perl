@@ -29,7 +29,7 @@ sub file_params_opt_spec {
     return (
         [ 'filetype:s' => 'Type of translation files' ],
         [
-            'file-per-language' =>
+            'language-file-tree' =>
               'Create a separate document for every language'
         ],
 
@@ -41,10 +41,10 @@ sub validate_file_params {
     my ( $self, $opt, $args ) = @_;
     my $rundata = $self->app->{rundata};
     $rundata->{filetype} = defined $opt->{filetype} ? $opt->{filetype} : '.po';
-    $rundata->{file_per_language} =
-      defined $opt->{file_per_language} ? $opt->{file_per_language} : 0;
+    $rundata->{language_file_tree} =
+      defined $opt->{language_file_tree} ? $opt->{language_file_tree} : 0;
 
-#if ($rundata->{file_per_language}) {
+#unless ($rundata->{language_file_tree}) {
 #    $self->app->{filename_template} = defined $opt->{filename_template} ? $opt->{filename_template} : '%LANG%_';
 #}
 }

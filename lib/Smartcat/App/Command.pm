@@ -85,7 +85,7 @@ sub validate_args {
     }
 
     $self->usage_error(
-"set params via 'config' command first or provide auth 'token_id' and 'token'"
+"set auth params via 'config' command first or provide options '--token-id' and '--token'"
       )
       unless ( defined $app->{config}->username
         && defined $app->{config}->password );

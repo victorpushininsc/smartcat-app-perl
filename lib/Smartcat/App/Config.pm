@@ -41,7 +41,13 @@ sub load {
     my $self = shift @_;
     $self = $self->new unless ref $self;
 
-    $self->{instance} = Config::Tiny->read( $self->get_config_file, "utf8" );
+    my $config_file = $self->get_config_file;
+    if ( -e $config_file ) {
+        $self->{instance} = Config::Tiny->read( $config_file, "utf8" );
+    }
+    else {
+        $self->{instance} = Config::Tiny->new;
+    }
 
     foreach my $attribute ( keys %{ $self->attribute_map } ) {
         my $args_key           = $self->attribute_map->{$attribute};

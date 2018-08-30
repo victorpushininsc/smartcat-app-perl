@@ -10,7 +10,7 @@ Smartcat::App::Config tests
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Test::Exception;
 use Test::Fatal;
 use Test::MockModule;
@@ -57,5 +57,11 @@ like(
     qr'ConfigError',
     "not valid 'log' value in config file raised an error"
 );
+
+$test_config_path =
+  catfile( dirname( abs_path(__FILE__) ), 'data', 'non_existing.config' );
+is( ref Smartcat::App::Config->load->{instance},
+    'Config::Tiny',
+    "init empty Config::Tiny instance for non existing config file" );
 
 1;

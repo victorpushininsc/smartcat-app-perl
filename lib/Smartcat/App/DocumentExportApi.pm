@@ -68,6 +68,7 @@ sub export_files {
         my $counter = 0;
 
         #die $task->id;
+        $log->info( sprintf( "Processing task '%s'...", $task->id ) );
         while ( $counter < TOTAL_ITERATION_COUNT ) {
             $log->info("Downloading exported files...");
             $response = eval {

@@ -86,8 +86,8 @@ sub export_files {
 
             last if $response->code != 204;
             $log->info("Export is not ready...");
-            sleep ITERATION_WAIT_TIMEOUT;
             $counter++;
+            sleep ITERATION_WAIT_TIMEOUT * $counter;
         }
         die $log->error("Cannot download exported files: $task->document_ids")
           if $counter == TOTAL_ITERATION_COUNT;

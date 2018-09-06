@@ -89,8 +89,10 @@ sub export_files {
             $counter++;
             sleep ITERATION_WAIT_TIMEOUT * $counter;
         }
-        die $log->error("Cannot download exported files: $task->document_ids")
-          if $counter == TOTAL_ITERATION_COUNT;
+        die $log->error(
+            sprintf( "Cannot download exported files: %s",
+                join( ', ', @{ $task->document_ids } ) )
+        ) if $counter == TOTAL_ITERATION_COUNT;
         if ($single_file_export) {
             my $doc  = $docs{ @{ $task->document_ids }[0] };
             my $name = $doc->name;

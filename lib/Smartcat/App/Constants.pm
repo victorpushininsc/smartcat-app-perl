@@ -14,7 +14,7 @@ our @EXPORT_OK = qw(
 
 use constant COMPLETE                              => 'completed';
 use constant EXPORT_ZIP_FILES_COUNT                => 10;
-use constant TOTAL_ITERATION_COUNT                 => 5;
+use constant TOTAL_ITERATION_COUNT                 => 10;
 use constant ITERATION_WAIT_TIMEOUT                => 1;
 use constant DOCUMENT_DISASSEMBLING_SUCCESS_STATUS => 'success';
 

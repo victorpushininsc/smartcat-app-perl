@@ -47,7 +47,7 @@ sub prepare_file_name {
     my ( $document_name, $document_target_language, $ext ) = @_;
 
     my $regexp = qr/_$document_target_language/;
-    $document_name =~ s/$regexp//;
+    $document_name =~ s/(.*)$regexp/$1/;
 
     return $document_name . $ext;
 }

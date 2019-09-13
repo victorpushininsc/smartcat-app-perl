@@ -45,9 +45,13 @@ our $VERSION = '0.0.1';
 sub init {
     my $self = shift;
 
+    my $base_url = undef;
+    $base_url = $self->{config}->base_url if ($self->{config}->base_url ne '' && $self->{config}->base_url);
+
     $self->{api} = Smartcat::Client::ApiClient->new(
         username => $self->{config}->username,
-        password => $self->{config}->password
+        password => $self->{config}->password,
+        base_url => $base_url,
     );
 
     my $log_level = "INFO";

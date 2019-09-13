@@ -80,7 +80,8 @@ __PACKAGE__->attribute_map(
     {
         'username' => 'token_id',
         'password' => 'token',
-        'log'      => 'log'
+        'log'      => 'log',
+        'base_url'  => 'base_url'
     }
 );
 

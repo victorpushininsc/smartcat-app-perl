@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use File::Basename;
+use File::Spec::Functions qw(catfile);
 
 our @ISA = qw(Exporter);
 
@@ -15,6 +16,7 @@ our @EXPORT = qw(
   get_ts_file_key
   get_document_key
   format_error_message
+  get_file_path
 );
 
 sub get_language_from_ts_filepath {
@@ -51,6 +53,16 @@ sub prepare_file_name {
 
     return $document_name . $ext;
 }
+
+
+sub get_file_path {
+  my ( $project_workdir, $document_target_language, $document_name, $ext ) = @_;
+  my $filename =
+        prepare_file_name( $document_name, $document_target_language, $ext );
+
+  return catfile( $project_workdir, $document_target_language, $filename );
+}
+
 
 sub format_error_message {
     my $s = shift;

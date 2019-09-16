@@ -20,15 +20,18 @@ our @EXPORT = qw(
   are_po_files_empty
 );
 
+
 sub get_language_from_ts_filepath {
     $_ = shift;
     return basename( dirname($_) );
 }
 
+
 sub get_ts_file_key {
     $_ = shift;
     return basename($_) . ' (' . get_language_from_ts_filepath($_) . ')';
 }
+
 
 sub get_document_key {
     my ( $name, $target_language ) = @_;
@@ -38,6 +41,7 @@ sub get_document_key {
     return $key . ' (' . $target_language . ')';
 }
 
+
 sub prepare_document_name {
     my ( $path, $filetype, $target_language ) = @_;
 
@@ -45,6 +49,7 @@ sub prepare_document_name {
 
     return $filename . '_' . $target_language . $ext;
 }
+
 
 sub prepare_file_name {
     my ( $document_name, $document_target_language, $ext ) = @_;
@@ -75,6 +80,7 @@ sub format_error_message {
 
     return $s;
 }
+
 
 sub save_file {
     my ( $filepath, $content ) = @_;

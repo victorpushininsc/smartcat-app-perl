@@ -91,7 +91,7 @@ sub export_files {
             sleep($timeout < MAX_ITERATION_WAIT_TIMEOUT ? $timeout : MAX_ITERATION_WAIT_TIMEOUT);
         }
         die $log->error(
-            sprintf( "Cannot download exported files: %s",
+            sprintf( "Cannot download exported files: %s. Export task is failed.",
                 join( ', ', @{ $task->document_ids } ) )
         ) if $response->code == 422;
 

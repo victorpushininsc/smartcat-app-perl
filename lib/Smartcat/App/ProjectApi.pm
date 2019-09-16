@@ -36,7 +36,7 @@ sub get_project {
         $self->{api}
           ->project_get( project_id => $self->{rundata}->{project_id} );
     };
-    die $log->error(
+    carp $log->error(
         sprintf(
             "Failed to get project '%s'.\nError:\n%s",
             $self->{rundata}->{project_id},

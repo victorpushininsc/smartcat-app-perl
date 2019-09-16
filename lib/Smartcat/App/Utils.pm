@@ -17,6 +17,7 @@ our @EXPORT = qw(
   get_document_key
   format_error_message
   get_file_path
+  are_po_files_empty
 );
 
 sub get_language_from_ts_filepath {
@@ -82,5 +83,25 @@ sub save_file {
     print $fh $content;
     close $fh;
 }
+
+
+sub are_po_files_empty {
+    my $filepaths = shift;
+    my $res = 1;
+
+    for my $filepath (@$filepaths) {
+      open(my $fh, $filepath) or die "Can't read $filepath: $!\n";
+      binmode($fh);
+      while (my $line = <$fh>) {
+        $res = ($1 eq "") if $line =~ m/msgid "(.*)"/;
+        last if !$res;
+      }
+      close $fh;
+      last if !$res;
+    }
+
+    return $res;
+}
+
 
 1;

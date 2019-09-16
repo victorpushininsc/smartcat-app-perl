@@ -102,7 +102,7 @@ sub execute {
     my ( @upload, @obsolete, @update );
     push @{
         defined $documents{$_}
-        ? ( $stats{$_} > 1 ? \@update : \@obsolete )
+        ? ( $stats{$_} > 1 && !are_po_files_empty( $ts_files{$_} ) ? \@update : \@obsolete )
         : \@upload
       },
       $_

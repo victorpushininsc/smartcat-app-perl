@@ -99,10 +99,8 @@ sub export_files {
             my $doc  = $docs{ @{ $task->document_ids }[0] };
             my $name = $doc->name;
             $log->info("Processing document '$name'...");
-            my $filename = prepare_file_name( $name, $doc->target_language,
-                $rundata->{filetype} );
-            my $filepath = catfile( $rundata->{project_workdir},
-                $doc->target_language, $filename );
+            my $filepath = get_file_path( $rundata->{project_workdir},
+                $doc->target_language, $name, $rundata->{filetype} );
             save_file( $filepath, $response->content );
             $log->info("Saved to '$filepath'.");
         }
@@ -128,11 +126,8 @@ sub _save_exported_files_from_zip {
         ) unless $name =~ m/(.*)\((.*)\)$rundata->{filetype}$/;
         $log->info("Processing member '$name'...");
         my $target_language = $2;
-        my $filename =
-          prepare_file_name( $1, $target_language, $rundata->{filetype} );
         my $filepath =
-          catfile( $rundata->{project_workdir}, $target_language, $filename );
-
+            get_file_path($rundata->{project_workdir}, $target_language, $1, $rundata->{filetype});
         #print Dumper $self;
         open( my $fh, '>', $filepath )
           or die $log->error("Could not open file '$filepath' $!");

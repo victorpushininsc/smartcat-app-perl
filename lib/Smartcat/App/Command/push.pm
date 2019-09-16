@@ -66,6 +66,7 @@ sub execute {
     );
 
     my $project = $app->project_api->get_project;
+    $app->project_api->update_project_external_tag( $project->name, "source:Serge" ) if ($#{ $project->documents } >= 0);
     my %documents;
     for ( @{ $project->documents } ) {
         my $key =

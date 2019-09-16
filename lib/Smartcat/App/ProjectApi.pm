@@ -5,6 +5,7 @@ package Smartcat::App::ProjectApi;
 
 use Smartcat::Client::ProjectApi;
 use Smartcat::Client::Object::CreateDocumentPropertyModel;
+use Smartcat::Client::Object::ProjectChangesModel;
 use Smartcat::App::Utils;
 
 use Carp;
@@ -44,6 +45,36 @@ sub get_project {
     ) unless $project;
 
     return $project;
+}
+
+sub update_project_external_tag {
+    my ($self, $name, $external_tag) = @_;
+
+    my %args = (name => $name);
+    $args{externalTag} = $external_tag if defined $external_tag;
+
+    my $project =
+      Smartcat::Client::Object::ProjectChangesModel->new(%args);
+
+    %args = (
+        project_id => $self->{rundata}->{project_id},
+        model => $project);
+
+    $log->info("Updating project '$self->{rundata}->{project_id}' with '$external_tag' external tag...");
+    eval {
+        $self->{api}->project_update_project( %args );
+    };
+
+    carp $log->error(
+        sprintf(
+            "Failed to update project '%s' with external_tag '%s'.\nError:\n%s",
+            $self->{rundata}->{project_id},
+            $external_tag,
+            format_error_message($@)
+        )
+    ) if $@;
+
+    return;
 }
 
 sub get_all_projects {

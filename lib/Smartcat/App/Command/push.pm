@@ -28,6 +28,7 @@ sub opt_spec {
     push @opts,
       [ 'disassemble-algorithm-name:s' =>
           'Optional disassemble file algorithm' ],
+      [ 'delete-not-existing' => 'Delete not existing documents' ],
       $self->project_id_opt_spec,
       $self->project_workdir_opt_spec,
       $self->file_params_opt_spec,
@@ -47,6 +48,8 @@ sub validate_args {
     $self->app->{rundata}->{disassemble_algorithm_name} =
       $opt->{disassemble_algorithm_name}
       if defined $opt->{disassemble_algorithm_name};
+    $self->app->{rundata}->{delete_not_existing} =
+      defined $opt->{delete_not_existing} ? $opt->{delete_not_existing} : 0;
 }
 
 sub execute {
@@ -119,7 +122,12 @@ sub execute {
     $self->upload( $project, $ts_files{$_} ) for @upload;
     $self->update( $project, $documents{$_}, $ts_files{$_} ) for @update;
 
-    #todo: obsolete
+    if ($rundata->{delete_not_existing}) {
+        my @document_ids;
+        push( @document_ids, map { $_->id } @{ $documents{$_} } ) for @obsolete;
+
+        $self->delete( \@document_ids) if @document_ids;
+    }
 
     $log->info(
         sprintf(
@@ -128,6 +136,12 @@ sub execute {
             $rundata->{project_workdir}
         )
     );
+}
+
+sub delete {
+    my ( $self, $document_ids ) = @_;
+
+    $self->app->document_api->delete_documents($document_ids);
 }
 
 sub update {

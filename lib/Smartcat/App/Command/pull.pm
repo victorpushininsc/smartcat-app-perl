@@ -55,6 +55,8 @@ sub execute {
     );
 
     my $project = $self->app->project_api->get_project;
+    exit 1 unless $project;
+
     unless ( !$rundata->{complete_projects} || $project->status eq COMPLETE ) {
         $log->warn(
             sprintf(

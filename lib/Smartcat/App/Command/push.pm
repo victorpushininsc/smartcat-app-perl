@@ -28,6 +28,8 @@ sub opt_spec {
     push @opts,
       [ 'disassemble-algorithm-name:s' =>
           'Optional disassemble file algorithm' ],
+      [ 'preset-disassemble-algorithm:s' =>
+          'Optional disassemble algorithm preset' ],
       [ 'delete-not-existing' => 'Delete not existing documents' ],
       $self->project_id_opt_spec,
       $self->project_workdir_opt_spec,
@@ -48,6 +50,9 @@ sub validate_args {
     $self->app->{rundata}->{disassemble_algorithm_name} =
       $opt->{disassemble_algorithm_name}
       if defined $opt->{disassemble_algorithm_name};
+    $self->app->{rundata}->{preset_disassemble_algorithm} =
+      $opt->{preset_disassemble_algorithm}
+      if defined $opt->{preset_disassemble_algorithm};
     $self->app->{rundata}->{delete_not_existing} =
       defined $opt->{delete_not_existing} ? $opt->{delete_not_existing} : 0;
 }

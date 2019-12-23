@@ -112,6 +112,9 @@ sub upload_file {
     $args{disassemble_algorithm_name} =
       $self->{rundata}->{disassemble_algorithm_name}
       if defined $self->{rundata}->{disassemble_algorithm_name};
+    $args{preset_disassemble_algorithm} =
+      $self->{rundata}->{preset_disassemble_algorithm}
+      if defined $self->{rundata}->{preset_disassemble_algorithm};
 
     my $documents = eval { $self->{api}->project_add_document(%args) };
     unless ($documents) {

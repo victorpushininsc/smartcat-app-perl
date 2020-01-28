@@ -121,6 +121,10 @@ sub _save_exported_files_from_zip {
     $log->info("Processing zipped exported file...");
     do {
         my $name = $u->getHeaderInfo()->{Name};
+        if ($name !~ m/$rundata->{filetype}$/) {
+            $log->info("Skipping member '$name'...");
+            next;
+        }
         die $log->error(
 "Cannot parse '$name' (filetype='$rundata->{filetype}') to get filename and target_language"
         ) unless $name =~ m/(.*)\((.*)\)$rundata->{filetype}$/;

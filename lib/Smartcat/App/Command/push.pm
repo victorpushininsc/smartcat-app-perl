@@ -107,7 +107,7 @@ sub execute {
     my ( @upload, @obsolete, @update );
     push @{
         defined $documents{$_}
-        ? ( $stats{$_} > 1 && !_check_if_files_are_empty( $ts_files{$_} ) ? \@update : \@obsolete )
+        ? ( $stats{$_} > 1 && !$self->_check_if_files_are_empty( $ts_files{$_} ) ? \@update : \@obsolete )
         : \@upload
       },
       $_
@@ -201,11 +201,11 @@ sub update {
 }
 
 sub _check_if_files_are_empty {
-    my $filepaths = shift;
+    my ($self, $filepaths) = @_;
 
     my $rundata = $self->app->{rundata};
 
-    if ($rundata->{filetype} eq "po") {
+    if ($rundata->{filetype} eq ".po") {
         return are_po_files_empty($filepaths);
     }
 

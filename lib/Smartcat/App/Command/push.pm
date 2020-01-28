@@ -107,7 +107,7 @@ sub execute {
     my ( @upload, @obsolete, @update );
     push @{
         defined $documents{$_}
-        ? ( $stats{$_} > 1 && !are_po_files_empty( $ts_files{$_} ) ? \@update : \@obsolete )
+        ? ( $stats{$_} > 1 && !_check_if_files_are_empty( $ts_files{$_} ) ? \@update : \@obsolete )
         : \@upload
       },
       $_
@@ -198,6 +198,18 @@ sub update {
     else {
         $self->_update_tree_document( $ts_files, $documents );
     }
+}
+
+sub _check_if_files_are_empty {
+    my $filepaths = shift;
+
+    my $rundata = $self->app->{rundata};
+
+    if ($rundata->{filetype} eq "po") {
+        return are_po_files_empty($filepaths);
+    }
+
+    return 0;
 }
 
 sub _upload_tree_document {

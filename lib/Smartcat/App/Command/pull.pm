@@ -39,7 +39,7 @@ sub validate_args {
     $self->app->{rundata}->{complete_documents} =
       defined $opt->{complete_documents} ? $opt->{complete_documents} : 0;
     $self->app->{rundata}->{skip_missing} =
-      defined $opt->{skip_missing} ? $opt->{skip_missing} : 1;
+      defined $opt->{skip_missing} ? $opt->{skip_missing} : 0;
 }
 
 sub execute {

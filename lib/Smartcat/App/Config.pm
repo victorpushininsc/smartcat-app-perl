@@ -33,7 +33,7 @@ sub validate_log {
 
 sub get_config_file {
     my $config_dir =
-      File::HomeDir->my_dist_config( "Smartcat::App", { create => 1 } );
+      File::HomeDir->my_dist_config( "Smartcat-App", { create => 1 } );
     return catfile( $config_dir, 'config' );
 }
 

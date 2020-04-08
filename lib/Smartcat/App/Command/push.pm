@@ -224,7 +224,7 @@ sub _upload_tree_document {
     $log->info( "Created documents ids:\n  "
           . join( ', ', map { $_->id } @$documents ) );
 
-    self->_update_tree_document( $ts_files, $documents );
+    $self->_update_tree_document( $ts_files, $documents );
 }
 
 sub _update_tree_document {

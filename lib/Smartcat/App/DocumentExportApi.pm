@@ -121,24 +121,24 @@ sub _save_exported_files_from_zip {
     $log->info("Processing zipped exported file...");
     do {
         my $name = $u->getHeaderInfo()->{Name};
-        if ($name !~ m/$rundata->{filetype}$/) {
+        if ($name =~ m/$rundata->{filetype}$/) {
+            die $log->error(
+    "Cannot parse '$name' (filetype='$rundata->{filetype}') to get filename and target_language"
+            ) unless $name =~ m/(.*)\((.*)\)$rundata->{filetype}$/;
+            $log->info("Processing member '$name'...");
+            my $target_language = $2;
+            my $filepath =
+                get_file_path($rundata->{project_workdir}, $target_language, $1, $rundata->{filetype});
+            #print Dumper $self;
+            open( my $fh, '>', $filepath )
+              or die $log->error("Could not open file '$filepath' $!");
+            binmode($fh);
+            print $fh $_ while <$u>;
+            close $fh;
+            $log->info("Saved to '$filepath'.");
+        } else {
             $log->info("Skipping member '$name'...");
-            next;
         }
-        die $log->error(
-"Cannot parse '$name' (filetype='$rundata->{filetype}') to get filename and target_language"
-        ) unless $name =~ m/(.*)\((.*)\)$rundata->{filetype}$/;
-        $log->info("Processing member '$name'...");
-        my $target_language = $2;
-        my $filepath =
-            get_file_path($rundata->{project_workdir}, $target_language, $1, $rundata->{filetype});
-        #print Dumper $self;
-        open( my $fh, '>', $filepath )
-          or die $log->error("Could not open file '$filepath' $!");
-        binmode($fh);
-        print $fh $_ while <$u>;
-        close $fh;
-        $log->info("Saved to '$filepath'.");
     } while ( ( $status = $u->nextStream() ) > 0 );
     die $log->error("Error processing downloaded content of $task->id: $!")
       if $status < 0;

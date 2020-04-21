@@ -104,24 +104,26 @@ sub execute {
     my %stats;
     $stats{$_}++ for ( keys %documents, keys %ts_files );
 
-    my ( @upload, @obsolete, @update );
+    my ( @upload, @obsolete, @update, @skip );
     push @{
-        defined $documents{$_}
-        ? ( $stats{$_} > 1 && !$self->_check_if_files_are_empty( $ts_files{$_} ) ? \@update : \@obsolete )
-        : \@upload
+        !$self->_check_if_files_are_empty( $ts_files{$_} )
+        ? defined $documents{$_} ? \@update : \@upload
+        : defined $documents{$_} ? \@obsolete : \@skip
       },
       $_
       for ( keys %stats );
 
     $log->info(
         sprintf(
-"State:\n  Upload [%d]\n    %s\n  Update [%d]\n    %s\n  Obsolete [%d]\n    %s\n",
+"State:\n  Upload [%d]\n    %s\n  Update [%d]\n    %s\n  Obsolete [%d]\n    %s\n  Skip [%d]\n    %s\n",
             scalar @upload,
             join( ', ', map { "'$_'" } @upload ),
             scalar @update,
             join( ', ', map { "'$_'" } @update ),
             scalar @obsolete,
-            join( ', ', map { "'$_'" } @obsolete )
+            join( ', ', map { "'$_'" } @obsolete ),
+            scalar @skip,
+            join( ', ', map { "'$_'" } @skip )
         )
     );
 

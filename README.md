@@ -14,10 +14,6 @@ Smartcat::App is a simple application which use Smartcat Integration API to sync
 
 Taras Semenenko <taras.semenenko@gmail.com>
 
-# COPYRIGHT
-
-Copyright 2018- Taras Semenenko
-
 # LICENSE
 
 This library is free software; you can redistribute it and/or modify

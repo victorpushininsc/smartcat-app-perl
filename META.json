@@ -87,13 +87,13 @@
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/ta2-1/smartcat-app-perl/issues"
+         "web" : "https://github.com/smartcatai/smartcat-app-perl/issues"
       },
-      "homepage" : "https://github.com/ta2-1/smartcat-app-perl",
+      "homepage" : "https://github.com/smartcatai/smartcat-app-perl",
       "repository" : {
          "type" : "git",
-         "url" : "https://github.com/ta2-1/smartcat-app-perl.git",
-         "web" : "https://github.com/ta2-1/smartcat-app-perl"
+         "url" : "https://github.com/smartcatai/smartcat-app-perl.git",
+         "web" : "https://github.com/smartcatai/smartcat-app-perl"
       }
    },
    "version" : "0.0.2",

@@ -9,6 +9,7 @@ requires "File::Copy" => "0";
 requires "File::Find" => "0";
 requires "File::HomeDir" => "0";
 requires "File::Spec::Functions" => "0";
+requires "HTTP::Message" => "6.11";
 requires "IO::Uncompress::Unzip" => "0";
 requires "JSON" => "0";
 requires "List::Util" => "0";

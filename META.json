@@ -50,6 +50,7 @@
             "File::Find" : "0",
             "File::HomeDir" : "0",
             "File::Spec::Functions" : "0",
+            "HTTP::Message" : "6.11",
             "IO::Uncompress::Unzip" : "0",
             "JSON" : "0",
             "List::Util" : "0",

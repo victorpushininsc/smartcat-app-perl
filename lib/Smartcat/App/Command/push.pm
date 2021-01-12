@@ -37,8 +37,6 @@ sub opt_spec {
       [ 'preset-disassemble-algorithm:s' =>
           'Optional disassemble algorithm preset' ],
       [ 'delete-not-existing' => 'Delete not existing documents' ],
-      [ 'auto-assign' => 'Auto-sign executives after uploading new documents' ],
-      [ 'internal-assign-stages' => 'Comma separated list of internal workflow stage numbers for auto-assign' ],
       $self->project_id_opt_spec,
       $self->project_workdir_opt_spec,
       $self->file_params_opt_spec,
@@ -55,32 +53,14 @@ sub validate_args {
     $self->validate_project_workdir( $opt, $args );
     $self->validate_file_params( $opt, $args );
 
-    my $app = $self->app;
-
-    $app->{rundata}->{disassemble_algorithm_name} =
+    $self->app->{rundata}->{disassemble_algorithm_name} =
       $opt->{disassemble_algorithm_name}
       if defined $opt->{disassemble_algorithm_name};
-    $app->{rundata}->{preset_disassemble_algorithm} =
+    $self->app->{rundata}->{preset_disassemble_algorithm} =
       $opt->{preset_disassemble_algorithm}
       if defined $opt->{preset_disassemble_algorithm};
-    $app->{rundata}->{delete_not_existing} =
+    $self->app->{rundata}->{delete_not_existing} =
       defined $opt->{delete_not_existing} ? $opt->{delete_not_existing} : 0;
-    $app->{rundata}->{auto_assign} =
-      defined $opt->{auto_assign} ? $opt->{auto_assign} : 0;
-
-    if ( defined $opt->{internal_assign_stages} ) {
-        $self->usage_error(
-"--internal-assign-stages option must be set together with --auto-assign only"
-        ) unless $app->{rundata}->{auto_assign};
-        $self->usage_error(
-"wrong value '$opt->{internal_assign_stages}' for --internal-assign-stages option"
-        ) unless $opt->{internal_assign_stages} =~ m/^(\d+,?)+$/;
-
-        $app->{rundata}->{internal_assign_stages} = $opt->{internal_assign_stages};
-    }
-
-    $app->{rundata}->{internal_assign_stages} =
-      defined $opt->{internal_assign_stages} ? grep {$_ ne ""} split(",", $opt->{internal_assign_stages}) : qw/1/;
 }
 
 sub execute {
@@ -291,10 +271,7 @@ sub _update_tree_document {
 sub upload {
     my ( $self, $project, $ts_files ) = @_;
 
-    my $app = $self->app;
-    my $rundata = $app->{rundata};
-    my $document_api = $app->document_api;
-
+    my $rundata = $self->app->{rundata};
     my @target_languages =
       map { &get_language_from_ts_filepath($_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
@@ -315,18 +292,10 @@ sub upload {
         my $path     = shift @$ts_files;
         my $filename = prepare_document_name( $path, $rundata->{filetype},
             $target_languages[0] );
-        my $documents = $app->project_api->upload_file( $path, $filename,
+        my $documents = $self->app->project_api->upload_file( $path, $filename,
             \@target_languages );
-        my @ids = map { $_->id } @$documents;
         $log->info( "Created documents ids:\n  "
-              . join( ', ', @ids ) );
-
-        if ( $rundata->{auto_assign} ) {
-            for my $stage_number ( $rundata->{internal_assign_stages} ) {
-                $log->info( "Assign documents [" . join(", ", @ids) . "] to MyTeam" );
-                $document_api->assign_documents_to_my_team(\@ids, $stage_number);
-            }
-        }
+              . join( ', ', map { $_->id } @$documents ) );
     }
 }
 

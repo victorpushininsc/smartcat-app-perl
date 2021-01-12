@@ -76,8 +76,8 @@ sub execute {
     for ( @{ $project->documents } ) {
         my $key =
             $rundata->{language_file_tree}
-          ? $_->name
-          : &get_document_key( $_->name, $_->target_language );
+          ? $_->path
+          : &get_document_key( $_->path, $_->target_language );
         $documents{$key} = [] unless defined $documents{$key};
         push @{ $documents{$key} }, $_;
     }
@@ -90,9 +90,9 @@ sub execute {
                 && m/$rundata->{filetype}$/ )
             {
                 s/$rundata->{filetype}$//;
-                my $name = catfile( dirname($File::Find::name), $_ );
+                my $path = catfile( dirname($File::Find::name), $_ );
                 my $key =
-                  $rundata->{language_file_tree} ? $_ : &get_ts_file_key($name);
+                  $rundata->{language_file_tree} ? $_ : &get_ts_file_key($rundata->{project_workdir}, $path);
                 $ts_files{$key} = [] unless defined $ts_files{$key};
                 push @{ $ts_files{$key} }, $File::Find::name;
             }
@@ -160,7 +160,7 @@ sub update {
     my $rundata = $app->{rundata};
 
     my @target_languages =
-      map { &get_language_from_ts_filepath($_) } @$ts_files;
+      map { &get_language_from_ts_filepath($rundata->{project_workdir}, $_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
     my %lang_pairs;
     my @files_without_documents;
@@ -169,7 +169,7 @@ sub update {
     for (@$ts_files) {
 
         #print $_."\n";
-        my $lang = get_language_from_ts_filepath($_);
+        my $lang = get_language_from_ts_filepath($rundata->{project_workdir}, $_);
         my $doc = first { $_->target_language eq $lang } @$documents;
 
         #p $doc;
@@ -232,10 +232,13 @@ sub _upload_tree_document {
 sub _update_tree_document {
     my ( $self, $ts_files, $documents ) = @_;
 
+    my $app     = $self->app;
+    my $rundata = $app->{rundata};
+
     my $document_api = $self->app->document_api;
     for (@$ts_files) {
         sleep ITERATION_WAIT_TIMEOUT * 5;
-        my $lang    = get_language_from_ts_filepath($_);
+        my $lang    = get_language_from_ts_filepath($rundata->{project_workdir}, $_);
         my $doc     = first { $_->target_language eq $lang } @$documents;
         my $counter = 0;
         while ( $counter < MAX_ITERATION_WAIT_TIMEOUT ) {
@@ -263,7 +266,7 @@ sub upload {
 
     my $rundata = $self->app->{rundata};
     my @target_languages =
-      map { &get_language_from_ts_filepath($_) } @$ts_files;
+      map { &get_language_from_ts_filepath($rundata->{project_workdir}, $_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
 
     if ( $rundata->{language_file_tree} ) {
@@ -280,7 +283,8 @@ sub upload {
         croak("Conflict: one target language to one file expected.")
           unless @$ts_files == 1 && @target_languages == 1;
         my $path     = shift @$ts_files;
-        my $filename = prepare_document_name( $path, $rundata->{filetype},
+        print "\n\n!!!!!!\n$path\n$target_languages[0]\n\n!!!!!\n";
+        my $filename = prepare_document_name( $rundata->{project_workdir}, $path, $rundata->{filetype},
             $target_languages[0] );
         my $documents = $self->app->project_api->upload_file( $path, $filename,
             \@target_languages );

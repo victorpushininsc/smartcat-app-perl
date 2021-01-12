@@ -80,7 +80,7 @@ sub execute {
     $app->project_api->update_project_external_tag( $project, "source:Serge" ) if ($#{ $project->documents } >= 0);
     my %documents;
     for ( @{ $project->documents } ) {
-        my $key = &get_document_key( $_->name, $_->target_language );
+        my $key = &get_document_key( $_->full_path, $_->target_language );
         $documents{$key} = [] unless defined $documents{$key};
         push @{ $documents{$key} }, $_;
     }
@@ -93,8 +93,8 @@ sub execute {
                 && m/$rundata->{filetype}$/ )
             {
                 s/$rundata->{filetype}$//;
-                my $name = catfile( dirname($File::Find::name), $_ );
-                my $key = &get_ts_file_key($name);
+                my $path = catfile( dirname($File::Find::name), $_ );
+                my $key = &get_ts_file_key($rundata->{project_workdir}, $path);
                 $ts_files{$key} = [] unless defined $ts_files{$key};
                 push @{ $ts_files{$key} }, $File::Find::name;
             }
@@ -165,7 +165,7 @@ sub update {
     my $rundata = $app->{rundata};
 
     my @target_languages =
-      map { &get_language_from_ts_filepath($_) } @$ts_files;
+      map { &get_language_from_ts_filepath($rundata->{project_workdir}, $_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
     my %lang_pairs;
     my @files_without_documents;
@@ -174,7 +174,7 @@ sub update {
     for (@$ts_files) {
 
         #print $_."\n";
-        my $lang = get_language_from_ts_filepath($_);
+        my $lang = get_language_from_ts_filepath($rundata->{project_workdir}, $_);
         my $doc = first { $_->target_language eq $lang } @$documents;
 
         #p $doc;
@@ -219,13 +219,13 @@ sub upload {
 
     my $rundata = $self->app->{rundata};
     my @target_languages =
-      map { &get_language_from_ts_filepath($_) } @$ts_files;
+      map { &get_language_from_ts_filepath($rundata->{project_workdir}, $_) } @$ts_files;
     my @project_target_languages = @{ $project->target_languages };
 
     croak("Conflict: one target language to one file expected.")
       unless @$ts_files == 1 && @target_languages == 1;
     my $path     = shift @$ts_files;
-    my $filename = prepare_document_name( $path, $rundata->{filetype},
+    my $filename = prepare_document_name( $rundata->{project_workdir}, $path, $rundata->{filetype},
         $target_languages[0] );
     my $documents = $self->app->project_api->upload_file( $path, $filename,
         \@target_languages );

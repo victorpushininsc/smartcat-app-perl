@@ -42,6 +42,8 @@ use Log::Any::Adapter;
 
 our $VERSION = '0.0.4';
 
+BEGIN { $ENV{PERL_LWP_SSL_VERIFY_HOSTNAME} = 0 } 
+
 sub init {
     my $self = shift;
 

@@ -20,6 +20,12 @@ use Smartcat::App::Utils;
 use Carp;
 use Log::Any qw($log);
 
+# How many documents to delete at a time
+# (there's a limitation on the number of the document due to
+# the fact that all document IDs are specified in a URL,
+# and URLs itself have length limitations).
+my $DELETE_BATCH_SIZE = 20;
+
 sub opt_spec {
     my ($self) = @_;
 
@@ -134,7 +140,11 @@ sub execute {
         my @document_ids;
         push( @document_ids, map { $_->id } @{ $documents{$_} } ) for @obsolete;
 
-        $self->delete( \@document_ids) if @document_ids;
+        # work in batches
+        while (scalar(@document_ids) > 0) {
+            my @batch = splice(@document_ids, 0, $DELETE_BATCH_SIZE);
+            $self->delete( \@batch );
+        }
     }
 
     $log->info(

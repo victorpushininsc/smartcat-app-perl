@@ -1,6 +1,8 @@
 Revision history for Smartcat-App
 
 {{$NEXT}}
+
+0.0.7  2021-03-22 19:34:44 UTC
         - Support UTF-8 filenames under Unix
 
 0.0.6  2021-03-12 21:41:10 UTC

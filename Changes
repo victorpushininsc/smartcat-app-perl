@@ -1,6 +1,8 @@
 Revision history for Smartcat-App
 
 {{$NEXT}}
+
+0.0.10  2021-04-22 22:05:04 UTC
         - Fix `pull` command for projects with folders for a single file
         - Fix `push` command for projects with folders on Win32
         - Fix `push` command with --delete-not-existing option for non .po files

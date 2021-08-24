@@ -32,6 +32,12 @@ sub file_params_opt_spec {
     );
 }
 
+sub split_filename_by_triple_dash_opt_spec {
+    return (
+        [ 'split-filename-by-triple-dash' => 'Split filename by triple dash to <name> and <id>' ],
+    );
+}
+
 sub validate_file_params {
     my ( $self, $opt, $args ) = @_;
     my $rundata = $self->app->{rundata};

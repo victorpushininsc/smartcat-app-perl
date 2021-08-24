@@ -17,7 +17,11 @@ our @EXPORT = qw(
   save_file
   get_language_from_ts_filepath
   get_ts_file_key
+  get_ts_file_key_by_triple_dash
   get_document_key
+  get_document_key_by_triple_dash
+  get_file_id
+  get_file_name
   format_error_message
   get_file_path
   are_po_files_empty
@@ -61,15 +65,60 @@ sub get_ts_file_key {
     return "$filepath ($language)";
 }
 
+sub get_ts_file_key_by_triple_dash {
+    my ($project_workdir, $path) = @_;
+
+    my @path_items = _get_path_items($project_workdir, $path);
+
+    my $language = shift @path_items;
+    my $filepath = join(PATH_SEPARATOR, @path_items);
+    
+    my ( $volume, $directories, $filename ) = splitpath( $filepath );
+    if ($filename =~ /^(.+)---([^\.].+?)$/) {
+        $filename = $2;
+        $filepath = $volume.$directories.$filename;
+    }
+    return "$filepath ($language)";
+}
 
 sub get_document_key {
     my ( $name, $target_language ) = @_;
-
     my $key = $name;
     $key =~ s/_($target_language)$//i;
     return $key . ' (' . $target_language . ')';
 }
 
+sub get_document_key_by_triple_dash {
+    my ( $full_path, $target_language ) = @_;
+    my $key = $full_path;
+    $key =~ s/_($target_language)$//i;
+    
+    my ( $volume, $directories, $filename ) = splitpath( $key );
+    if ($filename =~ /^(.+)---([^\.].+?)$/) {
+        $filename = $2;
+        $key = $volume.$directories.$filename;
+    }
+    return $key . ' (' . $target_language . ')';
+}
+
+sub get_file_id {
+    my ( $filepath ) = @_;
+    
+    my ($volume, $directories, $name) = splitpath($filepath);
+
+    if ($name =~ /^(.+)---([^\.].+?)(\..+)?$/) {
+        return $2;
+    }
+    return undef;
+}
+
+sub get_file_name {
+    my ( $filepath, $filetype, $target_language ) = @_;
+
+    my ( $filename, $dirs, $ext ) = fileparse( $filepath, $filetype );
+
+    return $filename . '_' . $target_language;
+}
 
 sub prepare_document_name {
     my ( $project_workdir, $path, $filetype, $target_language ) = @_;

@@ -32,9 +32,9 @@ sub file_params_opt_spec {
     );
 }
 
-sub split_filename_by_triple_dash_opt_spec {
+sub extract_id_from_name_opt_spec {
     return (
-        [ 'split-filename-by-triple-dash' => 'Split filename by triple dash to <name> and <id>' ],
+        [ 'extract-id-from-name' => 'Extract stable external document identifiers from filenames in "name---id.ext" format for comparison and automatic renaming' ],
     );
 }
 

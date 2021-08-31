@@ -17,9 +17,7 @@ our @EXPORT = qw(
   save_file
   get_language_from_ts_filepath
   get_ts_file_key
-  get_ts_file_key_by_triple_dash
   get_document_key
-  get_document_key_by_triple_dash
   get_file_id
   get_file_name
   format_error_message
@@ -53,51 +51,36 @@ sub get_language_from_ts_filepath {
     return shift @path_items;
 }
 
-
 sub get_ts_file_key {
-    my ($project_workdir, $path) = @_;
-
-    my @path_items = _get_path_items($project_workdir, $path);
-
-    my $language = shift @path_items;
-    my $filepath = join(PATH_SEPARATOR, @path_items);
-
-    return "$filepath ($language)";
-}
-
-sub get_ts_file_key_by_triple_dash {
-    my ($project_workdir, $path) = @_;
+    my ($project_workdir, $path, $should_extract_file_id) = @_;
 
     my @path_items = _get_path_items($project_workdir, $path);
 
     my $language = shift @path_items;
     my $filepath = join(PATH_SEPARATOR, @path_items);
     
-    my ( $volume, $directories, $filename ) = splitpath( $filepath );
-    if ($filename =~ /^(.+)---([^\.].+?)$/) {
-        $filename = $2;
-        $filepath = $volume.$directories.$filename;
+    if ( $should_extract_file_id ) {
+        my ( $volume, $directories, $filename ) = splitpath( $filepath );
+        if ($filename =~ /^(.+)---([^\.].+?)$/) {
+            $filepath = $volume.$directories.$2;
+        }
     }
+
     return "$filepath ($language)";
 }
 
 sub get_document_key {
-    my ( $name, $target_language ) = @_;
-    my $key = $name;
-    $key =~ s/_($target_language)$//i;
-    return $key . ' (' . $target_language . ')';
-}
-
-sub get_document_key_by_triple_dash {
-    my ( $full_path, $target_language ) = @_;
+    my ( $full_path, $target_language, $should_extract_file_id ) = @_;
     my $key = $full_path;
     $key =~ s/_($target_language)$//i;
-    
-    my ( $volume, $directories, $filename ) = splitpath( $key );
-    if ($filename =~ /^(.+)---([^\.].+?)$/) {
-        $filename = $2;
-        $key = $volume.$directories.$filename;
+
+    if ( $should_extract_file_id ) {
+        my ( $volume, $directories, $filename ) = splitpath( $key );
+        if ($filename =~ /^(.+)---([^\.].+?)$/) {
+            $key = $volume.$directories.$2;
+        }
     }
+
     return $key . ' (' . $target_language . ')';
 }
 

@@ -43,7 +43,7 @@ sub opt_spec {
       $self->project_id_opt_spec,
       $self->project_workdir_opt_spec,
       $self->file_params_opt_spec,
-      $self->split_filename_by_triple_dash_opt_spec,
+      $self->extract_id_from_name_opt_spec,
       ;
 
     return @opts;
@@ -65,8 +65,8 @@ sub validate_args {
       if defined $opt->{preset_disassemble_algorithm};
     $self->app->{rundata}->{delete_not_existing} =
       defined $opt->{delete_not_existing} ? $opt->{delete_not_existing} : 0;
-    $self->app->{rundata}->{split_filename_by_triple_dash} =
-      defined $opt->{split_filename_by_triple_dash} ? $opt->{split_filename_by_triple_dash} : 0;
+    $self->app->{rundata}->{extract_id_from_name} =
+      defined $opt->{extract_id_from_name} ? $opt->{extract_id_from_name} : 0;
 }
 
 sub execute {
@@ -87,9 +87,10 @@ sub execute {
     my %documents;
 
     for ( @{ $project->documents } ) {
-            my $key = $rundata->{split_filename_by_triple_dash}
-                ? &get_document_key_by_triple_dash( $_->full_path, $_->target_language )
-                : &get_document_key( $_->full_path, $_->target_language );
+            my $key = &get_document_key( 
+                $_->full_path,
+                $_->target_language,
+                $rundata->{extract_id_from_name} );
             $documents{$key} = [] unless defined $documents{$key};
             push @{ $documents{$key} }, $_;
     }
@@ -110,13 +111,10 @@ sub execute {
                 s/$rundata->{filetype}$//;
                 my $path = catfile( dirname($name), $_ );
 
-                # print "\tPath: ".$path."\n";
-
-                my $key = $rundata->{split_filename_by_triple_dash}
-                    ? &get_ts_file_key_by_triple_dash($rundata->{project_workdir}, $path)
-                    : &get_ts_file_key($rundata->{project_workdir}, $path);
-
-                # print "\tKey: ".$key."\n";
+                my $key = &get_ts_file_key(
+                    $rundata->{project_workdir},
+                    $path, 
+                    $rundata->{extract_id_from_name} );
 
                 utf8::decode($key);
                 $ts_files{$key} = [] unless defined $ts_files{$key};
@@ -128,11 +126,6 @@ sub execute {
 
     my %stats;
     $stats{$_}++ for ( keys %documents, keys %ts_files );
-
-    # print "documents:\n";
-    # print "\t".$_."\n" for keys %documents;
-    # print "ts:\n";
-    # print "\t".$_."\n" for keys %ts_files;
 
     my ( @upload, @obsolete, @update, @skip );
     push @{
@@ -195,7 +188,7 @@ sub update {
 
     my @target_languages =
       map { &get_language_from_ts_filepath($rundata->{project_workdir}, $_) } @$ts_files;
-    my %lang_pairs;
+    my %doc_and_path_by_lang;
     my @files_without_documents;
 
     #print Dumper $ts_files;
@@ -206,14 +199,14 @@ sub update {
 
         # p $doc;
         if ( defined $doc ) {
-            $lang_pairs{$lang} = [ $_, $doc->id, $doc->name ];
+            $doc_and_path_by_lang{$lang} = { path => $_, doc => $doc };
         }
         else {
             push @files_without_documents, $_;
         }
     }
     my @documents_without_files =
-      grep { !exists $lang_pairs{ $_->target_language } } @$documents;
+      grep { !exists $doc_and_path_by_lang{ $_->target_language } } @$documents;
 
     $log->warn(
         "No files for documents:"
@@ -226,34 +219,28 @@ sub update {
         "No documents for files:" . join( ', ', @files_without_documents ) )
       if @files_without_documents;
 
-    for ( keys %lang_pairs ) {
-        my @arr = @{ $lang_pairs{$_} };
+    for ( keys %doc_and_path_by_lang ) {
+        my $doc_and_path = $doc_and_path_by_lang{$_};
         
-        my $path = $arr[0];
-        my $document_id = $arr[1];
-
-        $api->update_document( $path, $document_id );
+        $api->update_document( $doc_and_path->{path}, $doc_and_path->{doc}->id );
         
-        if ( $rundata->{split_filename_by_triple_dash} ) {
+        if ( $rundata->{extract_id_from_name} ) {
             my $file_name = get_file_name(
-                $path,
+                $doc_and_path->{path},
                 $rundata->{filetype},
                 $target_languages[0]);
-            my $document_name = $arr[2];
+            my $document_name = $doc_and_path->{doc}->name;
 
-            # print "\tfile_name: " .$file_name."\n";
-            # print "\tdocument_name: " .$document_name."\n";
-
-            if ($file_name !~ $document_name) {
+            if ($file_name ne $document_name) {
                 $log->info(
                     sprintf(
                         "Renaming document '%s' from '%s' to '%s'.",
-                        $document_id,
+                        $doc_and_path->{doc}->id,
                         $document_name,
                         $file_name
                     )
                 );
-                $api->rename_document( $document_id, $file_name );  
+                $api->rename_document( $doc_and_path->{doc}->id, $file_name );  
             }
         }
     }
@@ -283,17 +270,12 @@ sub upload {
       unless @$ts_files == 1 && @target_languages == 1;
     my $path     = shift @$ts_files;
 
-    # print "\tPath: ".$path."\n";
-
     my $filename = prepare_document_name( $rundata->{project_workdir}, $path, $rundata->{filetype},
         $target_languages[0] );
 
-    # print "\tFilename: ".$filename."\n";
-
     my $external_id;
-    if ( $rundata->{split_filename_by_triple_dash}){
+    if ( $rundata->{extract_id_from_name}){
         $external_id = &get_file_id( $path );
-        # print "\tExternal_id: ".$external_id."\n";
     }
 
     my $documents = $self->app->project_api->upload_file( $path, $filename, $external_id,

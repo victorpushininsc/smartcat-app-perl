@@ -38,6 +38,12 @@ sub extract_id_from_name_opt_spec {
     );
 }
 
+sub external_tag_opt_spec {
+    return (
+        ['external-tag:s' => 'Set custom external tag for project. Default value: "source:Serge"']
+    );
+}
+
 sub validate_file_params {
     my ( $self, $opt, $args ) = @_;
     my $rundata = $self->app->{rundata};

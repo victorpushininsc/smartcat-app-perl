@@ -44,6 +44,7 @@ sub opt_spec {
       $self->project_workdir_opt_spec,
       $self->file_params_opt_spec,
       $self->extract_id_from_name_opt_spec,
+      $self->external_tag_opt_spec,
       ;
 
     return @opts;
@@ -67,6 +68,8 @@ sub validate_args {
       defined $opt->{delete_not_existing} ? $opt->{delete_not_existing} : 0;
     $self->app->{rundata}->{extract_id_from_name} =
       defined $opt->{extract_id_from_name} ? $opt->{extract_id_from_name} : 0;
+    $self->app->{rundata}->{external_tag} =
+      defined $opt->{external_tag} ? $opt->{external_tag} : "source:Serge";
 }
 
 sub execute {
@@ -83,7 +86,7 @@ sub execute {
     );
 
     my $project = $app->project_api->get_project;
-    $app->project_api->update_project_external_tag( $project, "source:Serge" ) if ($#{ $project->documents } >= 0);
+    $app->project_api->update_project_external_tag( $project, $rundata->{external_tag} ) if ($#{ $project->documents } >= 0);
     my %documents;
 
     for ( @{ $project->documents } ) {

@@ -24,9 +24,6 @@ use Log::Any qw($log);
 
 use Data::Dumper;
 
-use Digest::MD5 qw(md5_hex);
-use Encode qw(encode_utf8);
-
 sub new {
     my ( $class, $api, $rundata ) = @_;
 
@@ -133,9 +130,6 @@ sub _save_exported_files_from_zip {
             my $target_language = $2;
             my $filepath =
                 get_file_path($rundata->{project_workdir}, $target_language, $1, $rundata->{filetype});
-
-            print "\n\nfilepath = $filepath\n";
-            
             #print Dumper $self;
             open( my $fh, '>', $filepath )
               or die $log->error("Could not open file '$filepath' $!");
@@ -143,20 +137,6 @@ sub _save_exported_files_from_zip {
             print $fh $_ while <$u>;
             close $fh;
             $log->info("Saved to '$filepath'.");
-
-            open(my $fhr, $filepath) or die "Can't read $filepath: $!\n";
-            binmode($fhr, ':utf8');
-            my $text = join('', <$fhr>);
-            close $fhr;
-
-            my $hash = md5_hex(encode_utf8($text));
-            print "\nhash = $hash\n";
-
-            my $received_hash_file = $filepath . "_received" . ".hash";
-            print "\nsaving hash to $received_hash_file\n\n";
-            open(my $hfh, '>', $received_hash_file) or die $!;
-            print $hfh $hash;
-            close($hfh);
         } else {
             $log->info("Skipping member '$name'...");
         }

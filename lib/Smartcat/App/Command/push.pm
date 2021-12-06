@@ -76,8 +76,6 @@ sub validate_args {
 sub execute {
     my ( $self, $opt, $args ) = @_;
 
-    #print "\n\npush::execute()\n\n";
-
     my $app     = $self->app;
     my $rundata = $app->{rundata};
     $log->info(
@@ -87,21 +85,6 @@ sub execute {
             $rundata->{project_workdir}
         )
     );
-
-    #print "\n\nrundata->filetype = $rundata->{filetype}\n";
-    #print "rundata->project_id = $rundata->{project_id}\n";
-    #print "rundata->project_workdir = $rundata->{project_workdir}\n";
-    #$rundata->{debug} = 1;
-    #print "rundata->debug = $rundata->{debug}\n";
-    #print "rundata->disassemble_algorithm_name = $rundata->{disassemble_algorithm_name}\n";
-    #print "rundata->preset_disassemble_algorithm = $rundata->{preset_disassemble_algorithm}\n";
-    #print "rundata->complete_projects = $rundata->{complete_projects}\n";
-    #print "rundata->complete_documents = $rundata->{complete_documents}\n";
-    #print "rundata->skip_missing = $rundata->{skip_missing}\n";
-    #print "rundata->mode = $rundata->{mode}\n";
-    #print "rundata->delete_not_existing = $rundata->{delete_not_existing}\n";
-    #print "rundata->extract_id_from_name = $rundata->{extract_id_from_name}\n";
-    #print "rundata->external_tag = $rundata->{external_tag}\n\n\n";
 
     my $project = $app->project_api->get_project;
     $app->project_api->update_project_external_tag( $project, $rundata->{external_tag} ) if ($#{ $project->documents } >= 0);
@@ -148,35 +131,10 @@ sub execute {
     my %stats;
     $stats{$_}++ for ( keys %documents, keys %ts_files );
 
-    #print "\n\n";
-    #foreach my $key (keys %stats) {
-    #    my $value = $stats{$key};
-    #    print "stats($key) = $value\n";
-    #}
-    #print "\n\n";
-    #foreach my $key (keys %documents) {
-    #    my @value = $documents{$key};
-    #    foreach (@value) {
-    #        foreach (@$_) {
-    #            print "doc($key) = $_\n";
-    #        }
-    #    }
-    #}
-    #print "\n\n";
-    #foreach my $key (keys %ts_files) {
-    #    my @value = $ts_files{$key};
-    #    foreach (@value) {
-    #        foreach (@$_) {
-    #            print "ts_file($key) = $_\n";
-    #        }
-    #    }
-    #}
-    #print "\n\n";
-
     my ( @upload, @obsolete, @update, @skip );
     push @{
         exists $ts_files{$_} && !$self->_check_if_files_are_empty( $ts_files{$_} )
-        ? $self->_check_if_files_have_changed( $ts_files{$_} ) ? (defined $documents{$_} ? \@update : \@upload) : \@skip
+        ? defined $documents{$_} ? \@update : \@upload
         : defined $documents{$_} ? \@obsolete : \@skip
       },
       $_
@@ -217,7 +175,6 @@ sub execute {
             $rundata->{project_workdir}
         )
     );
-    #print "\n\nend of push::execute()\n\n";
 }
 
 sub delete {
@@ -228,8 +185,6 @@ sub delete {
 
 sub update {
     my ( $self, $project, $documents, $ts_files ) = @_;
-
-    #print "\n\npush::update()\n\n";
 
     my $app     = $self->app;
     my $api     = $app->document_api;
@@ -305,19 +260,6 @@ sub _check_if_files_are_empty {
     }
 
     return 0;
-}
-
-sub _check_if_files_have_changed {
-    my ($self, $filepaths) = @_;
-
-    my $rundata = $self->app->{rundata};
-
-    if ($rundata->{filetype} eq ".po") {
-        return have_po_files_changed($filepaths);
-    }
-
-    # always true for non-po files
-    return 1;
 }
 
 sub upload {

@@ -6,6 +6,9 @@ use warnings;
 use File::Basename;
 use File::Spec::Functions qw(catfile splitpath splitdir);
 
+use Digest::MD5 qw(md5_hex);
+use Encode qw(encode_utf8);
+
 use Smartcat::App::Constants qw(
   PATH_SEPARATOR
 );
@@ -23,6 +26,7 @@ our @EXPORT = qw(
   format_error_message
   get_file_path
   are_po_files_empty
+  have_po_files_changed
 );
 
 sub _get_path_items {
@@ -178,5 +182,85 @@ sub are_po_files_empty {
     return $empty;
 }
 
+
+sub have_po_files_changed {
+    my $filepaths = shift;
+    my $changed = 1;
+
+    print "\n\nbeginning of have_po_files_changed()\n";
+
+    for my $filepath (@$filepaths) {
+        print "\nfilepath = $filepath\n";
+
+        $changed = 1;
+
+        open(my $fh, $filepath) or die "Can't read $filepath: $!\n";
+        binmode($fh, ':utf8');
+        my $text = join('', <$fh>);
+        close $fh;
+
+        my $hash = md5_hex(encode_utf8($text));
+        print "\nhash = $hash\n";
+
+        my $sent_hash_same = undef;
+        my $received_hash_same = undef;
+
+        my $sent_hash_file = $filepath . "_sent" . ".hash";
+        print "\nsent_hash_file = $sent_hash_file\n";
+        if (not -e $sent_hash_file) {
+            print "\nno sent_hash_file, creating one\n";
+            open(my $hfh, '>', $sent_hash_file) or die $!;
+            print $hfh $hash;
+            close($hfh);
+        } else {
+            open(my $hfh, $sent_hash_file) or last;
+            binmode($hfh, ':utf8');
+            my $saved_sent_hash = join('', <$hfh>);
+            close $hfh;
+
+            print "\nsaved_sent_hash = $saved_sent_hash\n";
+
+            if (not $saved_sent_hash eq $hash) {
+                print "\nsent hash differs, saving to file\n";
+                open(my $hfh, '>', $sent_hash_file) or die $!;
+                print $hfh $hash;
+                close($hfh);
+            } else {
+                print "\nsent_hash_same = 1\n";
+                $sent_hash_same = 1;
+            }
+        }
+
+        my $received_hash_file = $filepath . "_received" . ".hash";
+        if (-e $received_hash_file and not $sent_hash_same) {
+            print "\nreceived_hash_file = $received_hash_file\n";
+
+            open(my $hfh, $received_hash_file) or last;
+            binmode($hfh, ':utf8');
+            my $saved_received_hash = join('', <$hfh>);
+            close $hfh;
+
+            print "\nsaved_received_hash = $saved_received_hash\n";
+
+            if ($saved_received_hash eq $hash) {
+                print "\nreceived_hash_same = 1\n";
+                $received_hash_same = 1;
+            }
+        }
+
+        if ($sent_hash_same or $received_hash_same) {
+            $changed = 0;
+        }
+    }
+
+    if ($changed == 0) {
+        print "\nNOT CHANGED\n";
+    }
+
+    print "\nresult = $changed\n\n";
+    print "\nending of have_po_files_changed()\n\n";
+
+    return $changed;
+}
 
 1;

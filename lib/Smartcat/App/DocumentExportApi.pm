@@ -106,6 +106,7 @@ sub export_files {
             my $filepath = get_file_path( $rundata->{project_workdir},
                 $doc->target_language, $name, $rundata->{filetype} );
             save_file( $filepath, $response->content );
+            save_file_hash($filepath, $filepath . "_received" . ".hash");
             $log->info("Saved to '$filepath'.");
         }
         else {
@@ -144,19 +145,7 @@ sub _save_exported_files_from_zip {
             close $fh;
             $log->info("Saved to '$filepath'.");
 
-            open(my $fhr, $filepath) or die "Can't read $filepath: $!\n";
-            binmode($fhr, ':utf8');
-            my $text = join('', <$fhr>);
-            close $fhr;
-
-            my $hash = md5_hex(encode_utf8($text));
-            print "\nhash = $hash\n";
-
-            my $received_hash_file = $filepath . "_received" . ".hash";
-            print "\nsaving hash to $received_hash_file\n\n";
-            open(my $hfh, '>', $received_hash_file) or die $!;
-            print $hfh $hash;
-            close($hfh);
+            save_file_hash($filepath, $filepath . "_received" . ".hash");
         } else {
             $log->info("Skipping member '$name'...");
         }

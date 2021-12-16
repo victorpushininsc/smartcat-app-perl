@@ -18,6 +18,7 @@ our @EXPORT = qw(
   prepare_document_name
   prepare_file_name
   save_file
+  save_file_hash
   get_language_from_ts_filepath
   get_ts_file_key
   get_document_key
@@ -161,6 +162,28 @@ sub save_file {
 }
 
 
+sub save_file_hash {
+    my ( $filepath, $file_hash_path ) = @_;
+    
+    # read the file
+    open(my $fhr, $filepath) or die "Can't read $filepath: $!\n";
+    binmode($fhr, ':utf8');
+    my $text = join('', <$fhr>);
+    close $fhr;
+
+    # calc the hash
+    my $hash = md5_hex(encode_utf8($text));
+    print "\nhash = $hash\n";
+
+    # save the hash into a file
+    #my $received_hash_file = $filepath . "_received" . ".hash";
+    print "\nsaving hash to $file_hash_path\n\n";
+    open(my $hfh, '>', $file_hash_path) or die $!;
+    print $hfh $hash;
+    close($hfh);
+}
+
+
 sub are_po_files_empty {
     my $filepaths = shift;
     my $empty = 1;
@@ -209,9 +232,7 @@ sub have_po_files_changed {
         print "\nsent_hash_file = $sent_hash_file\n";
         if (not -e $sent_hash_file) {
             print "\nno sent_hash_file, creating one\n";
-            open(my $hfh, '>', $sent_hash_file) or die $!;
-            print $hfh $hash;
-            close($hfh);
+            save_file_hash($filepath, $sent_hash_file);
         } else {
             open(my $hfh, $sent_hash_file) or last;
             binmode($hfh, ':utf8');
@@ -222,9 +243,7 @@ sub have_po_files_changed {
 
             if (not $saved_sent_hash eq $hash) {
                 print "\nsent hash differs, saving to file\n";
-                open(my $hfh, '>', $sent_hash_file) or die $!;
-                print $hfh $hash;
-                close($hfh);
+                save_file_hash($filepath, $sent_hash_file);
             } else {
                 print "\nsent_hash_same = 1\n";
                 $sent_hash_same = 1;

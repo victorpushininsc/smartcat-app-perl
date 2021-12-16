@@ -176,7 +176,6 @@ sub save_file_hash {
     print "\nhash = $hash\n";
 
     # save the hash into a file
-    #my $received_hash_file = $filepath . "_received" . ".hash";
     print "\nsaving hash to $file_hash_path\n\n";
     open(my $hfh, '>', $file_hash_path) or die $!;
     print $hfh $hash;
